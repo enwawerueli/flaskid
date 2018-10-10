@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Recent posts{% endblock %}
+
+{% block page_content %}
+    <div class="row">
+        <div class="col-md-8">
+        {% if not posts %}
+            <div class="alert alert-info">No posts found.</div>
+        {% else %}
+            {% for post in posts %}
+                <div>
+                    <p>{{ post.created_at | date }}</p>
+                    <a href="{{ url_for('posts.show', uid=post.uid) }}"><h3>{{ post.title }}</h3></a>
+                    <p>{{ post.body }}</p>
+                </div>
+                <hr>
+            {% endfor %}
+        {% endif %}
+        </div>
+        <div class="col-md-3">
+            <h4>About</h4>
+            <p>Summary of what this blog is all about</p>
+            {% if archive %}
+            <h4>Archive</h4>
+                <ul class="list-unstyled">
+                    {% for date in archive %}
+                        <li><a href="{{ url_for('posts.index', g=date.month) }}">{{ date | month }}</a></li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <h4>Social Media</h4>
+            <ul class="list-unstyled">
+                <li><a href="">Facebook</a></li>
+                <li><a href="">Twitter</a></li>
+                <li><a href="">Instagram</a></li>
+            </ul>
+        </div>
+        <div class="col-md-8">
+            <a href="{{ url_for('auth.login') }}">Login</a>&nbsp;|
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+            <p>Don't have an account?  <a href="{{ url_for('auth.register') }}">Register</a></p>
+            <a href="{{ url_for('posts.create') }}">Create post</a>
+        </div>
+    </div>
+{% endblock %}

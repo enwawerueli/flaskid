@@ -1,0 +1,15 @@
+{% macro show_comments(post) %}
+    {% for comment in post.comments %}
+        <div>
+            <h5>@{{ comment.author.name | capitalize }}</h5>
+            <p>{{ comment.body }}</p>
+            {% if comment.comments %}
+                <div class="container-fluid" style="margin: 10px; border-left: 3px solid gray;">
+                    show_comments(comment)
+                </div>
+            {% endif %}
+        <a href="{{ url_for('posts.like', uid=comment.uid) }}">Like</a>&nbsp;|
+        <a href="{{ url_for('posts.post_comment', uid=comment.uid) }}">Reply</a>
+        </div>
+    {% endfor %}
+{% endmacro %}

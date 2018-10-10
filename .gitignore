@@ -1,2 +1,4 @@
 # Ignore these folders
-__pycache__/*
+__pycache__/
+app/*.sqlite3
+venv/

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Create post{% endblock %}
+
+{% block page_content %}
+    <div>
+        <h4>Create a new post</h4>
+        <form action="{{ url_for('posts.create') }}", method="post">
+            {% import "bootstrap/wtf.html" as wtf %}
+            {{ wtf.quick_form(form) }}
+        </form>
+    </div>
+{% endblock %}
