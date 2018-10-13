@@ -1,15 +1,21 @@
-{% macro show_comments(post) %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% macro show_comments(post, form) %}
     {% for comment in post.comments %}
         <div>
             <h5>@{{ comment.author.name | capitalize }}</h5>
             <p>{{ comment.body }}</p>
-            {% if comment.comments %}
-                <div class="container-fluid" style="margin: 10px; border-left: 3px solid gray;">
-                    show_comments(comment)
-                </div>
-            {% endif %}
-        <a href="{{ url_for('posts.like', uid=comment.uid) }}">Like</a>&nbsp;|
-        <a href="{{ url_for('posts.post_comment', uid=comment.uid) }}">Reply</a>
+            <a href="{{ url_for('posts.like', post_id=post.uid, comment_id=comment.uid) }}">Like&nbsp;<span class="badge">{{ comment.likes | count }}</span></a>&nbsp;|
+            <a href="#{{ comment.uid }}" data-toggle="collapse">Reply&nbsp;<span class="badge">{{ comment.replies | count }}</span></a>
+            <div id="{{ comment.uid }}" class="collapse" style="margin-left: 16px; padding-left: 16px; border-left: 2px solid gray;">
+                {% if comment.replies %}
+                    {{ show_comments(comment, form) }}
+                {% endif %}
+                <form action="{{ url_for('posts.post_comment',post_id=post.uid, comment_id=comment.uid) }}" method="post">
+                    {{ wtf.quick_form(form) }}
+                </form>
+            </div>
         </div>
+        <hr>
     {% endfor %}
 {% endmacro %}

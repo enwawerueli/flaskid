@@ -4,7 +4,7 @@ from flask import request, session, render_template, redirect, url_for, flash
 from flask_login import login_required, login_user, logout_user
 
 from . import main, auth, posts, users
-from .models import db, User, Post, Comment
+from .models import db, User, Post, Comment, users_like_posts
 from .forms import LoginForm, RegistrationForm, PostForm, CommentForm
 
 
@@ -85,21 +85,35 @@ def create():
     return redirect(url_for('main.index'))
 
 
-@posts.route('/<int:uid>/like')
-def like(uid):
-    pass
-
-
-@posts.route('/<int:uid>/post-comment', methods=['post'])
+@posts.route('/<int:post_id>/comments/<int:comment_id>/like')
+@posts.route('/<int:post_id>/like')
 @login_required
-def post_comment(uid):
+def like(post_id, comment_id=None):
+    user = User.query.get(session['user_id'])
+    if comment_id is not None:
+        entity = Comment.query.get(comment_id)
+    else:
+        entity = Post.query.get(post_id)
+    entity.likes.append(user)
+    db.session.commit()
+    return redirect(url_for('posts.show', uid=post_id))
+
+
+@posts.route('/<int:uid>/comments', methods=['post'])
+@posts.route('/<int:post_id>/comments/<int:comment_id>/reply', methods=['post'])
+@login_required
+def post_comment(post_id, comment_id=None):
     cf = CommentForm()
     if not cf.validate_on_submit():
-        return render_template('show.html', post=Post.query.get_or_404(uid), form=cf)
-    comment = Comment(body=cf.body.data, post_id=uid, author_id=session['user_id'])
+        return render_template('show.html', post=Post.query.get_or_404(post_id), form=cf)
+    comment = Comment(body=cf.body.data, author_id=session['user_id'])
+    if comment_id is not None:
+        comment.comment_id = comment_id
+    else:
+        comment.post_id = post_id
     db.session.add(comment)
     db.session.commit()
-    return redirect(url_for('posts.show', uid=uid))
+    return redirect(url_for('posts.show', uid=post_id))
 
 
 @posts.route('/<int:uid>/share')

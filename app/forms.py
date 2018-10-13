@@ -30,5 +30,5 @@ class PostForm(FlaskForm):
 
 class CommentForm(FlaskForm):
 
-    body = TextAreaField('What do you think?', validators=[Required()])
+    body = TextAreaField('Leave a comment...', validators=[Required()])
     submit = SubmitField('Post')

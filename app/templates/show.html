@@ -12,7 +12,7 @@
         <p>{{ post.body }}</p>
     </div>
     <div>
-        <a href="{{ url_for('posts.like', uid=post.uid) }}">Like&nbsp;<span class="glyphicon glyphicon-thumbs-up"></span></a>&nbsp;|
+        <a href="{{ url_for('posts.like', post_id=post.uid) }}">Like&nbsp;<span class="badge">{{ post.likes | count }}</span></a>&nbsp;|
         <a href="{{ url_for('posts.share', uid=post.uid) }}">Share&nbsp;<span class="glyphicon glyphicon-share"></span></a>
     </div>
     <hr>
@@ -24,7 +24,7 @@
             <form action="{{ url_for('posts.post_comment', uid=post.uid) }}" method="post">
                 {{ wtf.quick_form(form) }}
             </form>
-            {{ show_comments(post) }}
+            {{ show_comments(post, form) }}
         </div>
     </div>
     <p>About the author: <a href="{{ url_for('users.show', uid=post.author.uid) }}">{{ post.author.name | capitalize }}</a></p>
