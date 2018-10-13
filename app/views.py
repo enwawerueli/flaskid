@@ -4,7 +4,7 @@ from flask import request, session, render_template, redirect, url_for, flash
 from flask_login import login_required, login_user, logout_user
 
 from . import main, auth, posts, users
-from .models import db, User, Post, Comment, users_like_posts
+from .models import db, User, Post, Comment
 from .forms import LoginForm, RegistrationForm, PostForm, CommentForm
 
 
@@ -68,9 +68,9 @@ def index():
     return render_template('index.html', posts=posts, archive=archive)
 
 
-@posts.route('/<int:uid>')
-def show(uid):
-    return render_template('show.html', post=Post.query.get_or_404(uid), form=CommentForm())
+@posts.route('/<int:post_id>')
+def show(post_id):
+    return render_template('show.html', post=Post.query.get_or_404(post_id), form=CommentForm())
 
 
 @posts.route('/create', methods=['get', 'post'])
@@ -96,10 +96,10 @@ def like(post_id, comment_id=None):
         entity = Post.query.get(post_id)
     entity.likes.append(user)
     db.session.commit()
-    return redirect(url_for('posts.show', uid=post_id))
+    return redirect(url_for('posts.show', post_id=post_id))
 
 
-@posts.route('/<int:uid>/comments', methods=['post'])
+@posts.route('/<int:post_id>/comments', methods=['post'])
 @posts.route('/<int:post_id>/comments/<int:comment_id>/reply', methods=['post'])
 @login_required
 def post_comment(post_id, comment_id=None):
@@ -113,16 +113,16 @@ def post_comment(post_id, comment_id=None):
         comment.post_id = post_id
     db.session.add(comment)
     db.session.commit()
-    return redirect(url_for('posts.show', uid=post_id))
+    return redirect(url_for('posts.show', post_id=post_id))
 
 
-@posts.route('/<int:uid>/share')
-def share(uid):
+@posts.route('/<int:post_id>/share')
+def share(post_id):
     pass
 
 
-@users.route('/<int:uid>')
-def show(uid):
+@users.route('/<int:user_id>')
+def show(user_id):
     pass
 
 

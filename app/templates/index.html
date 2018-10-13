@@ -11,7 +11,7 @@
             {% for post in posts %}
                 <div>
                     <p>{{ post.created_at | date }}</p>
-                    <a href="{{ url_for('posts.show', uid=post.uid) }}"><h3>{{ post.title }}</h3></a>
+                    <a href="{{ url_for('posts.show', post_id=post.uid) }}"><h3>{{ post.title }}</h3></a>
                     <p>{{ post.body }}</p>
                 </div>
                 <hr>
