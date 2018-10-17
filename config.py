@@ -3,8 +3,9 @@ import os
 
 class Config(object):
 
-    SECRET_KEY = os.environ.get('FLASKY_KEY') or 'some random string'
+    SECRET_KEY = os.environ.get('SKY_KEY') or 'some random string'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
 
     @staticmethod
     def configure(app):

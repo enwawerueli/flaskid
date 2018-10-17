@@ -1,15 +1,11 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask import Blueprint
 from flask_login import LoginManager
 from flask_bootstrap import Bootstrap
 
 from config import config
 
-main = Blueprint('main', __name__)
-auth = Blueprint('auth', __name__, url_prefix='/auth')
-posts = Blueprint('posts', __name__, url_prefix='/posts')
-users = Blueprint('users', __name__, url_prefix='/users')
+
 db = SQLAlchemy()
 login_manager = LoginManager()
 bootstrap = Bootstrap()

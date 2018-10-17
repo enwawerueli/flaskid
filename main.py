@@ -7,7 +7,7 @@ from app import create_app
 from app.views import blueprints
 
 
-app = create_app(os.environ.get('FLASKY_ENV') or 'default')
+app = create_app(os.environ.get('SKY_ENV') or 'default')
 for blueprint in blueprints:
     app.register_blueprint(blueprint)
 manager = Manager(app)

@@ -12,8 +12,8 @@
         <p>{{ post.body }}</p>
     </div>
     <div>
-        <a href="{{ url_for('posts.like', post_id=post.uid) }}">Like&nbsp;<span class="badge">{{ post.likes | count }}</span></a>&nbsp;|
-        <a href="{{ url_for('posts.share', post_id=post.uid) }}">Share&nbsp;<span class="glyphicon glyphicon-share"></span></a>
+        <a href="{{ url_for('posts.like', post_id=post.uid) }}"><span class="glyphicon glyphicon-heart-empty"></span>&nbsp;Like&nbsp;<span class="badge">{{ post.likes | count }}</span></a>&nbsp;|
+        <a href="{{ url_for('posts.share', post_id=post.uid) }}"><span class="glyphicon glyphicon-share"></span>&nbsp;Share</a>
     </div>
     <hr>
     <div class="panel panel-default">
@@ -22,10 +22,17 @@
         </div>
         <div class="panel-body">
             <form action="{{ url_for('posts.post_comment', post_id=post.uid) }}" method="post">
-                {{ wtf.quick_form(form) }}
+                <div class="row">
+                    <div class="col-md-10 form-group required">
+                        {{ form.body(class='form-control') }}
+                    </div>
+                    <div class="col-md-1">
+                        {{ form.submit(class='btn btn-default') }}
+                    </div>
+                </div>
             </form>
             {{ show_comments(post, form) }}
         </div>
     </div>
-    <p>About the author: <a href="{{ url_for('users.show', user_id=post.author.uid) }}">{{ post.author.name | capitalize }}</a></p>
+    <p>About the author: <a href="{{ url_for('auth.show', user_id=post.author.uid) }}">@{{ post.author.name | capitalize }}</a></p>
 {% endblock %}
