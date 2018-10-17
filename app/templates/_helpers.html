@@ -5,13 +5,23 @@
         <div>
             <h5>@{{ comment.author.name | capitalize }}&nbsp;<span class="glyphicon glyphicon-share-alt"></span>&nbsp;@{{ post.author.name | capitalize }}</h5>
             <p>{{ comment.body }}</p>
-            <a href="{{ url_for('posts.like', post_id=post.uid, comment_id=comment.uid) }}"><span class="glyphicon glyphicon-heart-empty"></span>&nbsp;Like&nbsp;<span class="badge">{{ comment.likes | count }}</span></a>&nbsp;|
-            <a href="#{{ comment.uid }}" data-toggle="collapse"><span class="glyphicon glyphicon-share-alt"></span>&nbsp;Reply&nbsp;<span class="badge">{{ comment.comments | count }}</span></a>
-            <div id="{{ comment.uid }}" class="collapse" style="margin-left: 16px; padding-left: 16px; border-left: 2px solid gray;">
+            <a href="{{ url_for('posts.like', post_id=post.uid, comment_id=comment.uid) }}">
+                <span class="glyphicon glyphicon-heart-empty"></span>&nbsp;
+                Like&nbsp;
+                <span class="badge">{{ comment.likes | count }}</span>
+            </a>&nbsp;|
+            <a href="#{{ comment.uid }}" data-toggle="collapse">
+                <span class="glyphicon glyphicon-share-alt"></span>&nbsp;
+                Reply&nbsp;
+                <span class="badge">{{ comment.comments | count }}</span>
+            </a>
+            <div id="{{ comment.uid }}" class="collapse"  style="margin-left: 16px; padding-left: 16px; border-left: 2px solid gray;">
                 {% if comment.comments %}
                     {{ show_comments(comment, form) }}
                 {% endif %}
                 <form action="{{ url_for('posts.post_comment',post_id=post.uid, comment_id=comment.uid) }}" method="post">
+                    {{ form.csrf_token }}
+                    {{ form.body.label(class='form-label') }}
                     <div class="row">
                         <div class="col-md-10 form-group required">
                             {{ form.body(class='form-control') }}

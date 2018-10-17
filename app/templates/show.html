@@ -22,6 +22,8 @@
         </div>
         <div class="panel-body">
             <form action="{{ url_for('posts.post_comment', post_id=post.uid) }}" method="post">
+                {{ form.csrf_token }}
+                {{ form.body.label(class='form-label') }}
                 <div class="row">
                     <div class="col-md-10 form-group required">
                         {{ form.body(class='form-control') }}
