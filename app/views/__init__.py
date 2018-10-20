@@ -6,7 +6,6 @@ posts_blueprint = Blueprint('posts', __name__, url_prefix='/posts')
 
 from . import auth
 from . import posts
-from . import template_utils
-
+from . import helpers
 
 blueprints = [main_blueprint, auth_blueprint, posts_blueprint]

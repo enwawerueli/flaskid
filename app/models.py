@@ -3,6 +3,8 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, AnonymousUserMixin
 from flask import current_app
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from itsdangerous import BadSignature
 
 from . import db, login_manager
 
@@ -49,7 +51,7 @@ class User(db.Model, UserMixin, CCMixin):
     name = db.Column(db.String(60), nullable=False, unique=True, index=True)
     email = db.Column(db.String(60), unique=True, index=True)
     _password = db.Column(db.String(255), nullable=False)
-    active = db.Column(db.Boolean, default=True)
+    active = db.Column(db.Boolean, default=False)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.uid'), nullable=False)
     role = db.relationship('Role', back_populates='users')
     posts = db.relationship('Post', back_populates='author', cascade='all, delete-orphan')
@@ -57,8 +59,8 @@ class User(db.Model, UserMixin, CCMixin):
     liked_posts = db.relationship('Post', back_populates='likes', secondary='users_like_posts')
     liked_comments = db.relationship('Comment', back_populates='likes', secondary='users_like_comments')
 
-    def __init__(self, **kwargs):
-        super(User, self).__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        super(User, self).__init__(*args, **kwargs)
         if self.role is None:
             role = 'administrator' if self.email == current_app.config['MAIL_USERNAME'] else 'user'
             self.role = Role.query.filter_by(name=role).one()
@@ -73,10 +75,14 @@ class User(db.Model, UserMixin, CCMixin):
         """ hash password """
         self._password = generate_password_hash(value)
 
+    @property
+    def is_active(self):
+        return self.active
+
     def __str__(self):
         return '<User: %s>' % self.name
 
-    def verify(self, password):
+    def verify_password(self, password):
         """ verify user """
         return check_password_hash(self._password, password)
 
@@ -89,6 +95,23 @@ class User(db.Model, UserMixin, CCMixin):
 
     def is_admin(self):
         return self.can(Permission.ADMINISTRATE)
+
+    def generate_token(self, expiration=3600):
+        serializer = Serializer(current_app.config['SECRET_KEY'], expires_in=expiration)
+        return serializer.dumps(dict(id=self.uid))
+
+    def verify_token(self, token):
+        serializer = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = serializer.loads(token)
+        except BadSignature:
+            return False
+        if data.get('id') != self.uid:
+            return False
+        self.active = True
+        db.session.add(self)
+        db.session.commit()
+        return True
 
 
 class AnonymousUser(AnonymousUserMixin):

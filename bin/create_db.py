@@ -9,6 +9,6 @@ from app.models import db
 
 
 if __name__ == '__main__':
-    app = create_app(os.environ.get('FLASKY_ENV') or 'default')
+    app = create_app(os.environ.get('SKY_ENV') or 'default')
     with app.app_context():
         db.create_all()

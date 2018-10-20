@@ -37,10 +37,11 @@
             </ul>
         </div>
         <div class="col-md-8">
+            <a href="{{ url_for('posts.create') }}" class="btn btn-primary">Create post</a>
+            <hr>
             <a href="{{ url_for('auth.login') }}">Login</a>&nbsp;|
             <a href="{{ url_for('auth.logout') }}">Logout</a>
             <p>Don't have an account?  <a href="{{ url_for('auth.register') }}">Register</a></p>
-            <a href="{{ url_for('posts.create') }}">Create post</a>
         </div>
     </div>
 {% endblock %}

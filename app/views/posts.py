@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 from . import main_blueprint, posts_blueprint
 from ..models import db, User, Post, Comment, Permission
 from ..forms import PostForm, CommentForm
-from ..utils import permission_required
+from ..utils import permission_required, send_mail
 
 
 @main_blueprint.route('/')
@@ -88,3 +88,9 @@ def post_comment(post_id, comment_id=None):
 @posts_blueprint.route('/<int:post_id>/share')
 def share(post_id):
     pass
+
+
+@posts_blueprint.route('/send-email')
+def send():
+    send_mail('seaworndrift@gmail.com', 'Welcome', 'mail/welcome')
+    return redirect(url_for('main.index'))
