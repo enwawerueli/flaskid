@@ -5,11 +5,13 @@
 {% block page_title %}User registration{% endblock %}
 
 {% block page_content %}
-    <div>
-        <h4>User registration</h4>
-        <form action="{{ url_for('auth.register') }}" method="post">
-            {{ wtf.quick_form(form) }}
-        </form>
-        <p>Already have an account? <a href="{{ url_for('auth.login') }}">Login</a></p>
+    <div class="col-md-offset-3 col-md-6 text-center">
+        <h2>User Registration</h2>
+        <div class="gray-box">
+            <form action="{{ url_for('auth.register') }}" method="post" class="input-centered">
+                {{ wtf.quick_form(form) }}
+            </form>
+        </div>
+        <p>Already have an account? <a href="{{ url_for('auth.login') }}">Login</a>.</p>
     </div>
 {% endblock %}

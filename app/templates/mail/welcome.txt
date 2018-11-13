@@ -1,0 +1,9 @@
+{% extends 'mail/base.txt' %}
+
+{% block content %}
+    Welcome to Sky Blog
+
+    We are pleased to have you on our platform. To activate your account, please follow the link below:
+    {{ url }}
+{% endblock %}
+

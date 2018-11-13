@@ -1,0 +1,7 @@
+<p>Dear {% if current_user.is_authenticated %}{{ current_user.username | capitalize }}{% else %}{{ user.username | capitalize }}{% endif %}</p>
+
+{% block content %}{% endblock %}
+
+<p>Sincerely,<br>The Sky Blog Team.</p>
+
+<p><strong>Note:</strong> This is a system generated email. Do not reply to this email.</p>

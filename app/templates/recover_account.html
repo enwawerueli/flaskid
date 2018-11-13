@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block page_title %}Account Recovery{% endblock %}
+
+{% block page_content %}
+    <div class="col-md-offset-3 col-md-6 text-center">
+        <h2>Forgot Password</h2>
+        <div class="gray-box">
+            <p>Enter the email adress registered to your account and we will send you a link to reset your password.</p>
+            <form action="{{ url_for('auth.recover_account') }}" method="post" class="input-centered">
+                {{ wtf.quick_form(form) }}
+            </form>
+        </div>
+        <p>Go back to <a href="{{ url_for('auth.login') }}">login page</a>.</p>
+    </div>
+{% endblock %}

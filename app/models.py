@@ -2,11 +2,8 @@ from datetime import datetime
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, AnonymousUserMixin
-from flask import current_app
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-from itsdangerous import BadSignature
 
-from . import db, login_manager
+from . import db
 
 
 class CCMixin(object):
@@ -19,6 +16,7 @@ class CCMixin(object):
 class Post(db.Model, CCMixin):
 
     __tablename__ = 'posts'
+
     title = db.Column(db.String(255), nullable=False, unique=True, index=True)
     body = db.Column(db.Text, nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey('users.uid'))
@@ -33,6 +31,7 @@ class Post(db.Model, CCMixin):
 class Comment(db.Model, CCMixin):
 
     __tablename__ = 'comments'
+
     body = db.Column(db.Text, nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('posts.uid'))
     author_id = db.Column(db.Integer, db.ForeignKey('users.uid'), nullable=False)
@@ -48,10 +47,13 @@ class Comment(db.Model, CCMixin):
 class User(db.Model, UserMixin, CCMixin):
 
     __tablename__ = 'users'
-    name = db.Column(db.String(60), nullable=False, unique=True, index=True)
+
+    username = db.Column(db.String(60), nullable=False, unique=True, index=True)
     email = db.Column(db.String(60), unique=True, index=True)
-    _password = db.Column(db.String(255), nullable=False)
-    active = db.Column(db.Boolean, default=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    bio = db.Column(db.Text)
+    profile_pic = db.Column(db.String(60), unique=True)
+    activated = db.Column(db.Boolean, default=False)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.uid'), nullable=False)
     role = db.relationship('Role', back_populates='users')
     posts = db.relationship('Post', back_populates='author', cascade='all, delete-orphan')
@@ -61,30 +63,26 @@ class User(db.Model, UserMixin, CCMixin):
 
     def __init__(self, *args, **kwargs):
         super(User, self).__init__(*args, **kwargs)
-        if self.role is None:
-            role = 'administrator' if self.email == current_app.config['MAIL_USERNAME'] else 'user'
-            self.role = Role.query.filter_by(name=role).one()
+        self.role = Role.query.filter_by(name='user').first()
 
     @property
     def password(self):
-        """ read password forbidden """
         raise AttributeError('password is not readable')
 
     @password.setter
     def password(self, value):
-        """ hash password """
-        self._password = generate_password_hash(value)
+        self.password_hash = generate_password_hash(value)
 
     @property
     def is_active(self):
-        return self.active
+        return self.activated
 
     def __str__(self):
         return '<User: %s>' % self.name
 
     def verify_password(self, password):
-        """ verify user """
-        return check_password_hash(self._password, password)
+        """ hek user password against the stored hash."""
+        return check_password_hash(self.password_hash, password)
 
     # Override
     def get_id(self):
@@ -96,23 +94,6 @@ class User(db.Model, UserMixin, CCMixin):
     def is_admin(self):
         return self.can(Permission.ADMINISTRATE)
 
-    def generate_token(self, expiration=3600):
-        serializer = Serializer(current_app.config['SECRET_KEY'], expires_in=expiration)
-        return serializer.dumps(dict(id=self.uid))
-
-    def verify_token(self, token):
-        serializer = Serializer(current_app.config['SECRET_KEY'])
-        try:
-            data = serializer.loads(token)
-        except BadSignature:
-            return False
-        if data.get('id') != self.uid:
-            return False
-        self.active = True
-        db.session.add(self)
-        db.session.commit()
-        return True
-
 
 class AnonymousUser(AnonymousUserMixin):
 
@@ -121,14 +102,6 @@ class AnonymousUser(AnonymousUserMixin):
 
     def is_admin(self):
         return False
-
-
-login_manager.anonymous_user = AnonymousUser
-
-
-@login_manager.user_loader
-def get_user(uid):
-    return User.query.get(int(uid))  # Get user by id
 
 
 users_like_posts = db.Table(
@@ -159,6 +132,7 @@ class Permission(object):
 class Role(db.Model):
 
     __tablename__ = 'roles'
+
     uid = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(60), nullable=False, index=True)
     permissions = db.Column(db.Integer, nullable=False)
@@ -166,12 +140,13 @@ class Role(db.Model):
 
     @classmethod
     def populate(cls):
-        roles = dict(
-            user=Permission.LIKE | Permission.COMMENT,
-            moderator=Permission.LIKE | Permission.COMMENT | Permission.PUBLISH | Permission.MODERATE_COMMENTS,
-            administrator=0xff
-        )
-        for name, permissions in roles.items():
+        user = Permission.LIKE | Permission.COMMENT
+        moderator = user | Permission.PUBLISH | Permission.MODERATE_COMMENTS
+        admin = moderator | Permission.ADMINISTRATE
+        for name, permissions in dict(
+                user=user,
+                moderator=moderator,
+                admin=admin):
             role = cls.query.filter_by(name=name).first()
             if role is None:
                 role = cls(name=name)

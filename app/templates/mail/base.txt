@@ -1,0 +1,8 @@
+Dear {% if current_user.is_authenticated %}{{ current_user.username | capitalize }}{% else %}{{ user.username | capitalize }}{% endif %}
+
+{% block content %}{% endblock %}
+
+Sincerely,
+The Sky Blog Team.
+
+Note: This is a system generated email. Do not reply to this email.

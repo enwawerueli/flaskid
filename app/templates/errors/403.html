@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block page_title %}Forbidden{% endblock %}
+
+{% block content %}
+    <div class="jumbotron">
+        <div class="text-center">
+            <h1>403 - Forbidden</h1>
+            <p>You do not have permission to access this page. Go <a href="{{ url_for('main.index')}}">back home</a>.</p>
+        </div>
+    </div>
+{% endblock %}

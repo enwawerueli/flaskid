@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Account activation{% endblock %}
+
+{% block page_content %}
+    <div>
+        <h2>Hello {{ current_user.username | capitalize }},</h2>
+        <p>You have not activated your account yet. We sent an activation link to your email, please check your inbox.</p>
+        <p>If you did not get the activation link or it did not work, <a href="{{ url_for('auth.resend_activation_link') }}">click here</a> to get a new link.</p>
+        <p>Or, <a href="{{ url_for('auth.logout') }}">click here</a> to continue browsing anonymously.</p>
+    </div>
+{% endblock %}

@@ -1,47 +1,64 @@
 {% extends 'base.html' %}
 
-{% block page_title %}Recent posts{% endblock %}
+{% block page_title %}Posts{% endblock %}
+
+{% macro post_li(post) %}
+    <li><a href="{{ url_for('posts.show', post_id=post.uid) }}"><strong>{{ post.title }}</strong></a> - {{ post.created_at | date }} by @{{ post.author.username | capitalize }}</li>
+{% endmacro %}
 
 {% block page_content %}
     <div class="row">
-        <div class="col-md-8">
-        {% if not posts %}
-            <div class="alert alert-info">No posts found.</div>
-        {% else %}
-            {% for post in posts %}
-                <div>
-                    <p>{{ post.created_at | date }}</p>
-                    <a href="{{ url_for('posts.show', post_id=post.uid) }}"><h3>{{ post.title }}</h3></a>
-                    <p>{{ post.body }}</p>
-                </div>
+        <div class="panel panel-default col-md-offset-1 col-md-7">
+            <div class="panel-body">
+                {% if not posts %}
+                    <div class="alert alert-info">No posts found.</div>
+                {% elif q %}
+                    <p><strong>Search results for "{{ q }}":</strong></p>
+                    {% for post in posts %}
+                        <ul class="list-unstyled">
+                            {{ post_li(post) }}
+                        </ul>
+                    {% endfor %}
+                {% else %}
+                    {% for post in posts %}
+                        {% if loop.first %}
+                            <p>{{ post.created_at | date }} by @{{ post.author.username | capitalize }}</p>
+                            <h2><a href="{{ url_for('posts.show', post_id=post.uid) }}">{{ post.title }}</a></h2>
+                            <p>{{ post.body }}</p>
+                            <hr>
+                            {% if posts | count is gt 1 %}
+                                <h4>Older Posts</h4>
+                            {% endif %}
+                        {% elif loop.index0 is lt 4 %}
+                            <ul class="list-unstyled">
+                                {{ post_li(post) }}
+                            </ul>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
                 <hr>
-            {% endfor %}
-        {% endif %}
+                <a href="{{ url_for('posts.create') }}" class="btn btn-primary">Create post</a>
+            </div>
         </div>
         <div class="col-md-3">
-            <h4>About</h4>
+            <h3>About</h3>
             <p>Summary of what this blog is all about</p>
             {% if archive %}
-            <h4>Archive</h4>
+            <hr>
+            <h3>Archive</h3>
                 <ul class="list-unstyled">
                     {% for date in archive %}
-                        <li><a href="{{ url_for('posts.index', g=date.month) }}">{{ date | month }}</a></li>
+                        <li><a href="{{ url_for('main.index', month=date.month) }}">{{ date | month }}</a></li>
                     {% endfor %}
                 </ul>
             {% endif %}
-            <h4>Social Media</h4>
+            <hr>
+            <h3>Social Media</h3>
             <ul class="list-unstyled">
                 <li><a href="">Facebook</a></li>
                 <li><a href="">Twitter</a></li>
                 <li><a href="">Instagram</a></li>
             </ul>
-        </div>
-        <div class="col-md-8">
-            <a href="{{ url_for('posts.create') }}" class="btn btn-primary">Create post</a>
-            <hr>
-            <a href="{{ url_for('auth.login') }}">Login</a>&nbsp;|
-            <a href="{{ url_for('auth.logout') }}">Logout</a>
-            <p>Don't have an account?  <a href="{{ url_for('auth.register') }}">Register</a></p>
         </div>
     </div>
 {% endblock %}

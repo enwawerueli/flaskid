@@ -1,0 +1,48 @@
+{% macro show_comments(post, form) %}
+    {% for comment in post.comments%}
+        <ul class="media-list">
+            <li class="media">
+                <div class="media-left">
+                  <a href="#">
+                    {% if comment.author.profile_pic %}
+                        {% set filename=comment.author.profile_pic %}
+                    {% else %}
+                        {% set filename='avatar.jpg' %}
+                    {% endif %}
+                    <img class="media-object" src="{{ url_for('auth.profile_picture', filename=filename) }}" alt="avatar" style="width: 64px; height: 64px;">
+                  </a>
+                </div>
+                <div class="media-body">
+                    <h4 class="media-heading">@{{ comment.author.username | capitalize }}</h4>
+                    <p>{{ comment.body }}</p>
+                    <a href="{{ url_for('posts.like', post_id=post.uid, comment_id=comment.uid) }}">
+                        <span class="glyphicon glyphicon-heart-empty"></span>&nbsp;
+                        Like&nbsp;
+                        <span class="badge">{{ comment.likes | count }}</span>
+                    </a>&nbsp;|
+                    <a href="#{{ comment.uid }}" data-toggle="collapse">
+                        <span class="glyphicon glyphicon-share-alt"></span>&nbsp;
+                        Reply&nbsp;
+                        <span class="badge">{{ comment.comments | count }}</span>
+                    </a>
+                    <div id="{{ comment.uid }}" class="collapse">
+                        <br>
+                        {% if comment.comments %}
+                            {{ show_comments(comment, form) }}
+                        {% endif %}
+                        <form action="{{ url_for('posts.post_comment', post_id=post.uid, comment_id=comment.uid) }}" method="post">
+                            {{ form.csrf_token() }}
+                            <div class="form-group col-md-8">
+                                {{ form.body(class='form-control') }}
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-default">Reply</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </li>
+        </ul>
+        <br>
+    {% endfor %}
+{% endmacro %}

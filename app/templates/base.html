@@ -1,37 +1,141 @@
 {% extends 'bootstrap/base.html' %}
 
-{% block title %}Sky - {% block page_title %}{% endblock %}{% endblock %}
+{% block title %}Sky Blog - {% block page_title %}{% endblock %}{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    <style type="text/css">
+        body {
+            padding-top: 70px;
+        }
+        .message-banner {
+            position: fixed;
+            width: 50%;
+            right: 25%;
+            top: 50px;
+            z-index: 1000;
+        }
+        .message-banner .alert {
+            border-radius: 0;
+        }
+        .message-banner .alert-success, .message-banner .alert-info, .message-banner .alert-danger {
+            border-width: 0 3px;
+            border-style: solid;
+        }
+        .message-banner .alert-success {
+            border-color: green;
+        }
+        .message-banner .alert-info {
+            border-color: #1e90ff;
+        }
+        .message-banner .alert-danger {
+            border-color: #b22222;
+        }
+        .gray-box {
+            margin: 16px;
+            padding: 32px;
+            border-radius: 3px;
+            background-color: #eee;
+        }
+        .input-centered input{
+            text-align: center;
+        }
+        @media screen and (max-width: 768px) {
+            .message-banner {
+                width: 100%;
+                right: 0;
+            }
+        }
+        footer {
+            padding: 16px;
+            background-color: #222;
+            color: #9d9d9d;
+            margin-top: 16px;
+        }
+        footer a:hover {
+            text-decoration: none;
+        }
+    </style>
+{% endblock %}
 
 {% block navbar %}
-    <div class="navbar navbar-inverse" role="navigation">
-        <div class="container">
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
                     <span class="sr-only">Toggle navigation</span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/">Sky Blogg</a>
+                <a class="navbar-brand" href="{{ url_for('main.index') }}">Sky Blog</a>
             </div>
-            <div class="navbar-collapse collapse">
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
                 <ul class="nav navbar-nav">
-                    <li><a href="/">Home</a></li>
+                    <li><a href="{{ url_for('main.index') }}">Home</a></li>
                 </ul>
-            </div>
+                <form class="navbar-form navbar-left" role="search" id="search-form">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-addon"><span class="glyphicon glyphicon-search"></span></div>
+                            <input type="text" class="form-control" placeholder="Search">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+                <ul class="nav navbar-nav navbar-right">
+                    {% if current_user.is_authenticated %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ current_user.username | capitalize }}<b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+                                <li><a href="{{ url_for('auth.profile') }}">Profile</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li><a href="{{ url_for('auth.login') }}"><span class="glyphicon glyphicon-log-in"></span>&nbsp;Login</a></li>
+                    {% endif %}
+                </ul>
+            </div><!-- /.navbar-collapse -->
         </div>
-    </div>
+    </nav>
 {% endblock %}
 
 {% block content %}
     <div class="container">
-        <div>
-            {% for msg in get_flashed_messages() %}
-                <div class="alert alert-info">
-                    <span>{{ msg }}</span>
+        {% for category, msg in get_flashed_messages(with_categories=true) %}
+            <div class="text-center message-banner">
+                <div class="alert alert-{{ category }} alert-dismissable" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <p>{{ msg }}</p>
                 </div>
-            {% endfor %}
-        </div>
+            </div>
+        {% endfor %}
         {% block page_content %}{% endblock %}
     </div>
+
+    <footer class="text-center">
+        <p>Copyright © 2018 - <a href="{{ url_for('main.index') }}"><strong>Sky Blog</strong></a> | Design by: enwawerueli</p>
+    </footer>
+{% endblock %}
+
+
+
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+
+        let url = '{{ url_for('main.index') }}';
+        let form = document.getElementById('search-form');
+        let input = form.querySelector('input');
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            window.location.href = url + '?q=' + input.value;
+        });
+
+    </script>
 {% endblock %}

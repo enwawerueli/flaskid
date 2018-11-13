@@ -1,0 +1,9 @@
+{% extends 'mail/base.html' %}
+
+{% block content %}
+    <h4>Confirm New Email</h4>
+
+    <p>You received this email because you requested to change your email. To activate your new email, click the link below:</p>
+    <a href="{{ url }}">{{ url }}</a>
+    <p>If you did not request this action, please ignore this email.</p>
+{% endblock %}

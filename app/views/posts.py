@@ -6,34 +6,39 @@ from flask_login import login_required, current_user
 from . import main_blueprint, posts_blueprint
 from ..models import db, User, Post, Comment, Permission
 from ..forms import PostForm, CommentForm
-from ..utils import permission_required, send_mail
+from ..utils import permission_required
 
 
 @main_blueprint.route('/')
-@posts_blueprint.route('/')
 def index():
-    g = request.args.get('g')
-    if g is not None:
-        month = int(g)
+    query = request.args.get('q')
+    filter_ = None
+    if query is not None:
+        filter_ = Post.title.ilike('%' + query + '%')
+    month = request.args.get('month')
+    if month is not None:
+        month = int(month)
         frm = dt.date.today().replace(month=month, day=1)
-        to = dt.date.today().replace(month=month)
-        last_day = 31
-        while True:
+        to = dt.date.today().replace(month=month, day=28)
+        max_day = 31
+        while max_day > 28:
             try:
-                to = to.replace(day=last_day)
+                to = to.replace(day=max_day)
                 break
             except ValueError:
-                last_day -= 1
-        ce = db.and_(Post.created_at >= dt.datetime.combine(frm, dt.time.min),
-                     Post.created_at <= dt.datetime.combine(to, dt.time.max))
-        posts = Post.query.filter(ce).order_by(db.desc(Post.created_at)).all()
-    else:
-        posts = Post.query.order_by(db.desc(Post.created_at)).all()
+                max_day -= 1
+        filter_ = db.and_(Post.created_at >= dt.datetime.combine(frm, dt.time.min),
+                          Post.created_at <= dt.datetime.combine(to, dt.time.max))
+    qry = Post.query.order_by(db.desc(Post.created_at))
+    if filter_ is not None:
+        qry = qry.filter(filter_)
+    posts = qry.all()
     archive = None
     if posts:
-        latest, earliest = Post.query.with_entities(db.func.max(Post.created_at), db.func.min(Post.created_at)).one()
+        latest, earliest = Post.query.with_entities(db.func.max(Post.created_at),
+                                                    db.func.min(Post.created_at)).one()
         archive = [dt.date(dt.MINYEAR, mon, 1) for mon in range(latest.month, earliest.month - 1, -1)]
-    return render_template('index.html', posts=posts, archive=archive)
+    return render_template('index.html', posts=posts, q=query, archive=archive)
 
 
 @posts_blueprint.route('/<int:post_id>')
@@ -43,7 +48,7 @@ def show(post_id):
 
 @posts_blueprint.route('/create', methods=['get', 'post'])
 @login_required
-# @permission_required(Permission.PUBLISH)
+@permission_required(Permission.PUBLISH)
 def create():
     pf = PostForm()
     if not pf.validate_on_submit():
@@ -90,7 +95,7 @@ def share(post_id):
     pass
 
 
-@posts_blueprint.route('/send-email')
-def send():
-    send_mail('seaworndrift@gmail.com', 'Welcome', 'mail/welcome')
-    return redirect(url_for('main.index'))
+@posts_blueprint.route('/authors/<username>')
+@login_required
+def author_profile(username):
+    pass

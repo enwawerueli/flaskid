@@ -1,0 +1,9 @@
+{% extends 'mail/base.txt' %}
+
+{% block content %}
+    Account Recovery
+
+    You received this email because you requested for a password reset. To reset your password, click the link below:
+    {{ url }}
+    If you did not request this action, please ignore this email.
+{% endblock %}

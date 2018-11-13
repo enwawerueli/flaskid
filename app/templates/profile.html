@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block page_title %}Personal Profile{% endblock %}
+
+{% block page_content %}
+    <div class="row">
+        <div class="col-md-offset-2 col-md-3">
+            <h4>Public profile</h4>
+            <div class="thumbnail">
+                {% if current_user.profile_pic %}
+                    {% set filename=current_user.profile_pic %}
+                {% else %}
+                    {% set filename='avatar.jpg' %}
+                {% endif %}
+                <img src="{{ url_for('auth.profile_picture', filename=filename) }}" alt="avatar">
+                <a href="#pic-form" data-toggle="collapse" class="btn btn-default" style="margin-top: 0; width: 100%; border-radius: 0;"><span class="glyphicon glyphicon-edit"></span>&nbsp;Edit</a>
+                <div id="pic-form" class="collapse">
+                    <form action="{{ url_for('auth.profile') }}", method="post" enctype="multipart/form-data">
+                        {{ wtf.quick_form(pic_form) }}
+                    </form>
+                </div>
+                <div class="caption">
+                    <h4>@{{ current_user.username | capitalize }}</h4>
+                    <h4>Bio</h4>
+                    {% if current_user.bio %}
+                        <p>{{ current_user.bio }}</p>
+                    {% else %}
+                        <p>You have not updated your bio.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <h4>Change Username</h4>
+            <form action="{{ url_for('auth.profile') }}" method="post">
+                {{ wtf.quick_form(name_form) }}
+            </form>
+            <br>
+            <h4>Update Bio</h4>
+            <form action="{{ url_for('auth.profile') }}" method="post">
+                {{ wtf.quick_form(bio_form) }}
+            </form>
+            <br>
+            <h4>Change Email</h4>
+            <form action="{{ url_for('auth.profile') }}" method="post">
+                {{ wtf.quick_form(email_form) }}
+            </form>
+            <br>
+            <h4>Change Password</h4>
+            <form action="{{ url_for('auth.profile') }}" method="post">
+                {{ wtf.quick_form(pswd_form) }}
+            </form>
+            <br>
+            <h4 class="text-danger">Delete Account</h4>
+            <div class="alert alert-warning">
+                <p><strong>Note:</strong> Once you delete your account this cannot be undone. Be certain you really want to do this.</p>
+            </div>
+            <a href="{{ url_for('auth.delete_account') }}" class="btn btn-danger">Delete Account</a>
+            <br>
+        </div>
+    </div>
+{% endblock %}
